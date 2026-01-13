@@ -14,52 +14,62 @@ spec:
     spec:
       containers:
       - name: fastapi
-        image: pigashit/audiophile-backend:v4  # 👈 稍後我們會推 v4
+        image: pigashit/audiophile-backend:latest  # 👈 建議改 latest，配 Actions 自動化
         ports:
         - containerPort: 8000
         env:
-        # --- 敏感資料：從 Secret 讀取 ---
+        # --- 從 Secret 讀取 (Key 全部對齊你的 .env 變數名) ---
         - name: DB_USER
           valueFrom:
             secretKeyRef:
               name: audiophile-secrets
-              key: db-user
-        - name: DB_PASS
+              key: DB_USER
+        - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:
               name: audiophile-secrets
-              key: db-pass
+              key: DB_PASSWORD
         - name: DB_NAME
           valueFrom:
             secretKeyRef:
               name: audiophile-secrets
-              key: db-name
+              key: DB_NAME
         - name: GEMINI_API_KEY
           valueFrom:
             secretKeyRef:
               name: audiophile-secrets
-              key: gemini-key
+              key: GEMINI_API_KEY
         - name: SPOTIFY_CLIENT_ID
           valueFrom:
             secretKeyRef:
               name: audiophile-secrets
-              key: spotify-id
+              key: SPOTIFY_CLIENT_ID
         - name: SPOTIFY_CLIENT_SECRET
           valueFrom:
             secretKeyRef:
               name: audiophile-secrets
-              key: spotify-secret
+              key: SPOTIFY_CLIENT_SECRET
         - name: SECRET_KEY
           valueFrom:
             secretKeyRef:
               name: audiophile-secrets
-              key: jwt-secret
+              key: SECRET_KEY
 
-        # --- 非敏感資料：直接定義 ---
+        # --- 基礎設施連線 (修正為 K8s Service 名稱) ---
         - name: DB_HOST
-          value: "postgres-service"
+          value: "postgres-db"     # 👈 根據你之前的 pods 列表，名字應該是這個
         - name: DB_PORT
           value: "5432"
+        - name: REDIS_HOST
+          value: "redis-db"        # 👈 根據你之前的 pods 列表名稱
+        - name: REDIS_PORT
+          value: "6379"
+        - name: MONGO_HOST
+          value: "mongodb"         # 👈 根據你之前的 pods 列表名稱
+        - name: MONGO_PORT
+          value: "27017"
+        
+        # --- 其他設定 ---
         - name: ALGORITHM
           value: "HS256"
         - name: ACCESS_TOKEN_EXPIRE_MINUTES
@@ -72,8 +82,8 @@ spec:
           httpGet:
             path: /health 
             port: 8000
-          initialDelaySeconds: 45 
-          periodSeconds: 10
+          initialDelaySeconds: 60  # 給多一點時間啟動，避免連資料庫太慢被 K8s 砍掉
+          periodSeconds: 15
 ---
 apiVersion: v1
 kind: Service
