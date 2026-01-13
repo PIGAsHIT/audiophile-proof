@@ -30,3 +30,4 @@ python-multipart
 
 # --- 測試工具 ---
 pytest
+pytest-asyncio
