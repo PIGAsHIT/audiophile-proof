@@ -1,47 +1,123 @@
-name: CI Pipeline
+name: Audiophile CI/CD
 
-# 觸發條件：當 Push 到 main 分支，或發起 Pull Request 時
 on:
   push:
-    branches: [ main ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ main ]
+    branches: [ "main" ]
 
 jobs:
+  # --- 第一階段：執行測試 (CI) ---
   test:
     runs-on: ubuntu-latest
 
+    # 🟢 關鍵修改：一次啟動三個服務 (Postgres, Redis, Mongo)
+    services:
+      # 1. PostgreSQL
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432
+        # 健康檢查：等 DB 準備好再跑測試
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      # 2. Redis
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      # 3. MongoDB
+      mongo:
+        image: mongo:6
+        env:
+          MONGO_INITDB_ROOT_USERNAME: admin
+          MONGO_INITDB_ROOT_PASSWORD: secret_mongo
+        ports:
+          - 27017:27017
+        # Mongo 6 的健康檢查比較龜毛，這裡用 mongosh ping
+        options: >-
+          --health-cmd "echo 'db.runCommand(\"ping\").ok' | mongosh localhost:27017/test --quiet"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
-    # 1. 下載你的程式碼
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # 2. 安裝 Python 3.10
-    - name: Set up Python 3.10
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.10"
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    # 3. 安裝依賴套件
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest httpx
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # 安裝專案依賴 + 測試工具 + 資料庫驅動
+          pip install -r requirements.txt
+          pip install pytest httpx psycopg2-binary motor redis
 
-    # 4. 建立一個假的 .env 檔
-    # 因為 .gitignore 擋住了 .env，但程式執行需要環境變數
-    # 我們這裡隨便填一些假資料，反正測試是用 SQLite，不會真的連 Gemini
-    - name: Create fake .env for testing
-      run: |
-        echo "DATABASE_URL=sqlite:///./test.db" >> .env
-        echo "SECRET_KEY=testing_secret" >> .env
-        echo "ALGORITHM=HS256" >> .env
-        echo "GEMINI_API_KEY=fake_key" >> .env
-        echo "SPOTIFY_CLIENT_ID=fake_id" >> .env
-        echo "SPOTIFY_CLIENT_SECRET=fake_secret" >> .env
+      - name: Run Tests
+        # 🟢 設定環境變數讓 Python 連到上面的 Service
+        env:
+          # Postgres 設定
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: password
+          POSTGRES_SERVER: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_DB: test_db
+          
+          # Mongo 設定 (帳密要跟上面 mongo service 一樣)
+          MONGO_USER: admin
+          MONGO_PASSWORD: secret_mongo
+          MONGO_HOST: localhost
+          MONGO_PORT: 27017
+          
+          # Redis 設定
+          REDIS_HOST: localhost
+          
+          # 其他
+          SECRET_KEY: supersecretkeytesting
+        run: |
+          python -m pytest
 
-    # 5. 執行測試
-    - name: Run Tests with Pytest
-      run: |
-        python -m pytest
+  # --- 第二階段：打包並上傳 Docker Hub (CD) ---
+  build-and-push:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          # ⚠️ 記得改回你的 Docker Hub 帳號
+          tags: yourusername/audiophile-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
