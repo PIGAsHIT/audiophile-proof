@@ -24,7 +24,7 @@ async def get_optional_user(request: Request, db: Session = Depends(get_db)):
         return db.query(User).filter(User.email == payload.get("sub")).first()
     except: return None
 
-@router.post("/recommend", response_model=TrackRecommendation)
+@router.post("", response_model=TrackRecommendation) 
 async def get_recommendation(request: HeadphoneRequest, user: Optional[User] = Depends(get_optional_user)):
     # 1. Cache Check
     cached = get_cached_recommendation(request.brand, request.model)

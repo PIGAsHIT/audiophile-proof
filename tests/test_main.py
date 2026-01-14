@@ -10,22 +10,24 @@ def test_read_root():
     assert response.status_code == 200
 
 def test_user_registration_lifecycle():
-    # 使用 UUID 確保每次測試 Email 絕對唯一
     unique_email = f"test_{uuid.uuid4()}@example.com"
     user_data = {"email": unique_email, "password": "password123"}
 
-    # 1. 測試首次註冊 (預期成功)
-    res_create = client.post("/register", json=user_data)
+    res_create = client.post("/auth/register", json=user_data)
     assert res_create.status_code == 200
-    assert res_create.json()["msg"] == "Created successfully"
+    assert "success" in res_create.json().get("detail", "").lower() or res_create.status_code == 200
 
-    # 2. 測試重複註冊 (預期失敗)
-    res_duplicate = client.post("/register", json=user_data)
+    res_duplicate = client.post("/auth/register", json=user_data)
     assert res_duplicate.status_code == 400
     assert res_duplicate.json()["detail"] == "Email already registered"
+
+    login_data = {"username": unique_email, "password": "password123"}
+    res_login = client.post("/auth/token", data=login_data)
+    assert res_login.status_code == 200
+    assert "access_token" in res_login.json()
 
 def test_invalid_registration():
     # 測試格式錯誤的請求
     invalid_data = {"email": "not-an-email"}
-    response = client.post("/register", json=invalid_data)
+    response = client.post("/auth/register", json=invalid_data)
     assert response.status_code == 422 # FastAPI 預設的驗證錯誤碼

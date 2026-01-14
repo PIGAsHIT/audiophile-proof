@@ -1,6 +1,9 @@
 # 忽略資料庫數據 (解決 Permission denied 的關鍵！)
 docker_data/
 terraform/
+infra/docker_data/
+postgres_data/
+mongo_data/
 
 # 忽略虛擬環境
 venv/

@@ -1,16 +1,14 @@
-# 第一部分：PVC - 申請 1GB 的永久硬碟空間
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: mongodb-pvc
 spec:
   accessModes:
-    - ReadWriteOnce # 這塊硬碟同時只能被一個節點讀寫
+    - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi    # 申請 1GB
+      storage: 1Gi
 ---
-# 第二部分：Deployment - 定義 MongoDB 並掛載硬碟
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -29,22 +27,25 @@ spec:
         image: mongo:latest
         ports:
         - containerPort: 27017
-        # 這裡設定環境變數（從 Secret 讀取會更專業，我們暫時先寫死）
         env:
         - name: MONGO_INITDB_ROOT_USERNAME
-          value: "admin"
+          valueFrom:
+            secretKeyRef:
+              name: audiophile-secrets
+              key: POSTGRES_USER
         - name: MONGO_INITDB_ROOT_PASSWORD
-          value: "password"
-        # 掛載保險箱
+          valueFrom:
+            secretKeyRef:
+              name: audiophile-secrets
+              key: POSTGRES_PASSWORD
         volumeMounts:
         - name: mongodb-storage
-          mountPath: /data/db # MongoDB 預設存資料的地方
+          mountPath: /data/db
       volumes:
       - name: mongodb-storage
         persistentVolumeClaim:
-          claimName: mongodb-pvc # 對應上面的 PVC 名稱
+          claimName: mongodb-pvc
 ---
-# 第三部分：Service - 內部導航
 apiVersion: v1
 kind: Service
 metadata:

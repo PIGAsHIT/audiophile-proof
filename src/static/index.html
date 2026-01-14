@@ -16,6 +16,8 @@
             background: linear-gradient(to right, #fcd34d, #d97706);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
+            color: transparent;
         }
 
         .fade-in {
@@ -136,31 +138,31 @@
     </div>
 
     <script>
-        let currentToken = localStorage.getItem('token') || "";
+        // ✅ 更有 Sense 的邏輯：改用 sessionStorage 並移除自動跳轉
+        let currentToken = sessionStorage.getItem('token') || "";
         let currentTrackData = null;
         let isRegisterMode = false;
         let isFavorited = false;
 
-        if (currentToken) {
-            verifyTokenAndInit();
-        }
+        // ✅ 明確狀態管理：進入頁面一律顯示登入區塊，不主動呼叫 verifyTokenAndInit
+        window.onload = () => {
+            console.log("App Initialized. Please Login.");
+        };
 
         async function verifyTokenAndInit() {
+            if (!currentToken) return;
             try {
-                const res = await fetch('/history', {
+                const res = await fetch('/user/history', {
                     headers: { 'Authorization': `Bearer ${currentToken}` }
                 });
 
                 if (res.ok) {
-                    // Token 有效，准許進入
                     initApp();
                 } else {
-                    // Token 無效 (例如資料庫重置了)，自動清除並留在登入頁
-                    console.log("Token 失效 (Zombie Token)，自動登出");
+                    console.log("Session expired.");
                     logout();
                 }
             } catch (e) {
-                // 網路錯誤或其他異常，保險起見也登出
                 logout();
             }
         }
@@ -171,7 +173,6 @@
             switchTab('search');
         }
 
-        // --- Tab 切換邏輯 ---
         function switchTab(tab) {
             ['search', 'history', 'collection'].forEach(t => {
                 document.getElementById(`${t}-view`).classList.add('hidden');
@@ -191,23 +192,18 @@
             if (tab === 'history') loadHistory();
         }
 
-        // --- 載入歷史紀錄 ---
         async function loadHistory() {
             const list = document.getElementById('history-list');
             list.innerHTML = '<p class="text-center text-gray-600">Loading history...</p>';
-
             try {
-                const res = await fetch('/history', { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                const res = await fetch('/user/history', { headers: { 'Authorization': `Bearer ${currentToken}` } });
                 const data = await res.json();
-
                 list.innerHTML = '';
                 if (data.length === 0) {
                     list.innerHTML = '<p class="text-center text-gray-600">No search history yet.</p>';
                     return;
                 }
-
                 data.forEach(item => {
-                    // 點擊歷史紀錄直接搜尋
                     list.innerHTML += `
                         <div onclick="restoreSearch('${item.brand}', '${item.model}')" class="bg-[#1e1e1e] p-4 border-l-4 border-gray-700 hover:border-amber-500 cursor-pointer transition group">
                             <div class="flex justify-between items-center">
@@ -220,26 +216,23 @@
                                     <i class="fas fa-chevron-right text-gray-700 group-hover:text-amber-500 mt-1"></i>
                                 </div>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                 });
             } catch (e) { console.error(e); }
         }
 
-        // --- 從歷史還原搜尋 ---
         function restoreSearch(brand, model) {
             document.getElementById('brand').value = brand;
             document.getElementById('model').value = model;
             switchTab('search');
-            getRecommendation(); // 直接觸發搜尋 (如果有快取會秒開)
+            getRecommendation();
         }
 
-        // --- 載入收藏 (Collection) ---
         async function loadCollection() {
             const list = document.getElementById('fav-list');
             list.innerHTML = 'Loading...';
             try {
-                const res = await fetch('/favorites', { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                const res = await fetch('/user/favorites', { headers: { 'Authorization': `Bearer ${currentToken}` } });
                 const data = await res.json();
                 list.innerHTML = '';
                 data.forEach(item => {
@@ -257,11 +250,10 @@
             } catch (e) { }
         }
 
-
-        async function handleAuth() { /* 複製上一版 */
+        async function handleAuth() {
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const endpoint = isRegisterMode ? '/register' : '/token';
+            const endpoint = isRegisterMode ? '/auth/register' : '/auth/token';
             const body = isRegisterMode ? JSON.stringify({ email, password }) : new URLSearchParams({ username: email, password });
             const headers = isRegisterMode ? { 'Content-Type': 'application/json' } : { 'Content-Type': 'application/x-www-form-urlencoded' };
             try {
@@ -269,41 +261,39 @@
                 const data = await res.json();
                 if (res.ok) {
                     if (isRegisterMode) { alert("Success! Please Login."); toggleAuthMode(); }
-                    else { currentToken = data.access_token; localStorage.setItem('token', currentToken); initApp(); }
+                    else {
+                        currentToken = data.access_token;
+                        sessionStorage.setItem('token', currentToken); // ✅ 使用 sessionStorage
+                        initApp();
+                    }
                 } else { alert(data.detail); }
             } catch (e) { alert(e); }
         }
+
         function toggleAuthMode() {
             isRegisterMode = !isRegisterMode;
-
-            // 取得 DOM 元素
             const btn = document.getElementById('auth-btn');
             const title = document.getElementById('auth-title');
-            const toggleText = document.getElementById('toggle-text'); // 抓取底下那行小字
-
+            const toggleText = document.getElementById('toggle-text');
             if (isRegisterMode) {
-                // --- 切換到 註冊模式 ---
                 title.innerText = "REGISTER";
                 btn.innerText = "Create Account";
-                // ✅ 關鍵修正：這裡要改成「已有帳號？去登入」
                 toggleText.innerText = "Already have an account? Login";
-
-                // (選擇性) 按鈕變綠色，區分狀態
                 btn.classList.remove('gold-gradient');
                 btn.classList.add('bg-green-600', 'text-white');
             } else {
-                // --- 切換到 登入模式 ---
                 title.innerText = "LOGIN";
                 btn.innerText = "Login";
-                // ✅ 關鍵修正：這裡要改成「還沒有帳號？去註冊」
                 toggleText.innerText = "Create an Account";
-
-                // 還原金屬色按鈕
                 btn.classList.remove('bg-green-600', 'text-white');
                 btn.classList.add('gold-gradient');
             }
         }
-        function logout() { localStorage.removeItem('token'); location.reload(); }
+
+        function logout() {
+            sessionStorage.removeItem('token');
+            location.reload();
+        }
 
         async function getRecommendation() {
             const brand = document.getElementById('brand').value;
@@ -331,18 +321,30 @@
             finally { btn.innerHTML = 'Analyze'; btn.disabled = false; }
         }
 
-        async function deleteFavorite(id) { if (!confirm("Remove?")) return; await fetch(`/favorites/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` } }); loadCollection(); }
-        async function checkFavoriteStatus(id) {
-            try { const res = await fetch(`/favorites/check/${id}`, { headers: { 'Authorization': `Bearer ${currentToken}` } }); const d = await res.json(); isFavorited = d.is_favorited; updateFavBtn(); } catch (e) { }
+        async function deleteFavorite(id) {
+            if (!confirm("Remove?")) return;
+            await fetch(`/user/favorites/${id}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${currentToken}` } });
+            loadCollection();
         }
+
+        async function checkFavoriteStatus(id) {
+            try {
+                const res = await fetch(`/user/favorites/check/${id}`, { headers: { 'Authorization': `Bearer ${currentToken}` } });
+                const d = await res.json();
+                isFavorited = d.is_favorited;
+                updateFavBtn();
+            } catch (e) { }
+        }
+
         function updateFavBtn() {
             const btn = document.getElementById('fav-btn');
             btn.className = isFavorited ? "absolute top-4 right-4 bg-red-600 text-white p-3 rounded-full text-2xl transition shadow-lg shadow-red-900/50" : "absolute top-4 right-4 bg-black/50 text-gray-400 p-3 rounded-full text-2xl transition hover:text-white";
         }
+
         async function toggleFavorite() {
             if (!currentToken) return alert("Please Login");
             const method = isFavorited ? 'DELETE' : 'POST';
-            const url = isFavorited ? `/favorites/${currentTrackData.track_id}` : '/favorites';
+            const url = isFavorited ? `/user/favorites/${currentTrackData.track_id}` : '/user/favorites';
             const body = isFavorited ? null : JSON.stringify({ track_id: currentTrackData.track_id, title: currentTrackData.title, artist: currentTrackData.artist, cover_url: currentTrackData.cover_url, spotify_url: currentTrackData.spotify_url });
             await fetch(url, { method, headers: { 'Authorization': `Bearer ${currentToken}`, 'Content-Type': 'application/json' }, body });
             isFavorited = !isFavorited;

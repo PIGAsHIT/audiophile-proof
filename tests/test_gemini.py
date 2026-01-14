@@ -9,6 +9,7 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 TEST_MODEL = "gemini-2.5-flash" 
 
 @pytest.mark.skipif(not GEMINI_API_KEY, reason="Skipping: GEMINI_API_KEY not found")
+@pytest.mark.asyncio
 def test_gemini_connection():
     client = genai.Client(api_key=GEMINI_API_KEY)
     
@@ -22,11 +23,10 @@ def test_gemini_connection():
             contents=test_prompt
         )
 
-        # 驗證回傳物件的結構與內容
-        assert response and response.text, "API returned an empty response"
-        assert len(response.text.strip()) > 0
-        
-        print(f"\n[Gemini Test Success] Response: {response.text.strip()}")
+        assert response is not None, "API returned None"
+        res_text = response.text if hasattr(response, 'text') else response.candidates[0].content.parts[0].text
+        assert len(res_text.strip()) > 0, "Response text is empty"
+        print(f"\n[Gemini Test Success] Response: {res_text.strip()}")
 
     except Exception as e:
         pytest.fail(f"Gemini API connection failed: {e}")
