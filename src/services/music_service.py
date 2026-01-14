@@ -15,7 +15,8 @@ async def get_spotify_token():
 
 async def search_track(query: str):
     token = await get_spotify_token()
-    if not token: return None
+    if not token: 
+        return None
     
     async with httpx.AsyncClient() as client:
         resp = await client.get(

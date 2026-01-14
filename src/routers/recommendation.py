@@ -5,7 +5,6 @@ from src.services.ai_service import analyze_headphone
 from src.services.music_service import search_track
 from src.db.redis import get_cached_recommendation, set_cached_recommendation
 from src.db.mongo import log_request
-from src.services.auth_service import get_current_user # 這裡可以用來做 optional user logic
 from src.models.user import User
 from jose import jwt
 from src.core.config import settings
@@ -17,12 +16,14 @@ router = APIRouter()
 # 輔助：嘗試取得使用者但不強制
 async def get_optional_user(request: Request, db: Session = Depends(get_db)):
     auth = request.headers.get('Authorization')
-    if not auth: return None
+    if not auth: 
+        return None
     try:
         token = auth.split(" ")[1]
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         return db.query(User).filter(User.email == payload.get("sub")).first()
-    except: return None
+    except Exception: 
+        return None
 
 @router.post("", response_model=TrackRecommendation) 
 async def get_recommendation(request: HeadphoneRequest, user: Optional[User] = Depends(get_optional_user)):

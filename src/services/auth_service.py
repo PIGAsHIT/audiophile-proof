@@ -24,9 +24,12 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: str = payload.get("sub")
-        if email is None: raise HTTPException(status_code=401)
-    except JWTError: raise HTTPException(status_code=401)
+        if email is None: 
+            raise HTTPException(status_code=401)
+    except JWTError: 
+        raise HTTPException(status_code=401)
     
     user = db.query(User).filter(User.email == email).first()
-    if user is None: raise HTTPException(status_code=401)
+    if user is None: 
+        raise HTTPException(status_code=401)
     return user

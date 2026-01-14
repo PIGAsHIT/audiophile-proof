@@ -42,6 +42,7 @@ async def analyze_headphone(brand: str, model: str):
             return json.loads(resp.text)
         except Exception as e:
             print(f"Gemini Error: {e}")
-            if attempt == 2: return None 
+            if attempt == 2: 
+                return None 
             time.sleep(1)
     return None

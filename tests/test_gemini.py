@@ -1,6 +1,5 @@
 import os
 import pytest
-import asyncio
 from google import genai
 from dotenv import load_dotenv
 
