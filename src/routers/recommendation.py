@@ -1,15 +1,15 @@
 from fastapi import APIRouter, Depends, Request
 from typing import Optional
-from src.schemas import HeadphoneRequest, TrackRecommendation
+from src.schema.schemas import HeadphoneRequest, TrackRecommendation
 from src.services.ai_service import analyze_headphone
 from src.services.music_service import search_track
-from src.cache import get_cached_recommendation, set_cached_recommendation
-from src.mongo import log_request
+from src.db.redis import get_cached_recommendation, set_cached_recommendation
+from src.db.mongo import log_request
 from src.services.auth_service import get_current_user # 這裡可以用來做 optional user logic
-from src.models import User
+from src.models.user import User
 from jose import jwt
 from src.core.config import settings
-from src.database import get_db
+from src.db.postgres import get_db
 from sqlalchemy.orm import Session
 
 router = APIRouter()

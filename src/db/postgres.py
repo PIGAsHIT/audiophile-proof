@@ -2,6 +2,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from src.core.config import settings
 
 # 1. 安全地從環境變數讀取，不設任何明碼預設值
 # 這些變數名稱必須跟 K8s YAML 裡的 name 對上
@@ -15,8 +16,7 @@ DB_NAME = os.getenv("DB_NAME", "audiophile_db")
 SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
 # 3. 初始化 SQLAlchemy
-# 如果是異步 FastAPI，這裡會用 create_async_engine，但你目前使用 psycopg2
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

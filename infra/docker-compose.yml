@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  
+  backend:
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    #image: pigashit/audiophile-backend:latest
+    container_name: audiophile_backend
+    restart: always
+    ports:
+      - "8000:8000"
+    
+    
+    env_file:
+      - ../.env
+    
+    
+    depends_on:
+      - postgres 
+      - redis
+      - mongo
+
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      
+      # Redis 設定
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      
+      # MongoDB 設定
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASSWORD=${MONGO_PASSWORD}
+      
+      
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      - SECRET_KEY=${SECRET_KEY}
+
+    volumes:
+      - ../src:/app/src  
+
+  # =========================================
+  # Infra (資料庫層)
+  # =========================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: audiophile_postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - ../.env
+    
+    
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}         # 如果 .env 沒設，預設 postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password} # 如果 .env 沒設，預設 password
+      POSTGRES_DB: ${DB_NAME:-audiophile_db}
+    
+    volumes:
+      
+      - ../docker_data/postgres:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    container_name: audiophile_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    
+
+  mongo:
+    image: mongo:latest
+    container_name: audiophile_mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    env_file:
+      - ../.env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD:-secret_mongo}
+    volumes:
+      - ../docker_data/mongo:/data/db

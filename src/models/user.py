@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.sql import func
-from src.database import Base
+from src.db.postgres import Base 
 
 class User(Base):
     # 資料表名稱
