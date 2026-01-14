@@ -1,4 +1,4 @@
-# 🎧 Audiophile Proof API | 高傳真音訊分析平台後端
+# 🎧 Audiophile Proof | 高傳真音訊分析平台後端
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green) ![Docker](https://img.shields.io/badge/Docker-Available-blue) ![K8s](https://img.shields.io/badge/Kubernetes-Ready-blue) ![Grafana](https://img.shields.io/badge/Grafana-Monitoring-orange)
 
