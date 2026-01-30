@@ -1,8 +1,0 @@
-prometheus:
-  prometheusSpec:
-    additionalScrapeConfigs:
-      - job_name: 'fastapi-app'
-        metrics_path: '/metrics'
-        scrape_interval: 5s
-        static_configs:
-          - targets: ['fastapi-service.default.svc.cluster.local:80']
