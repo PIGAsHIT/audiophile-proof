@@ -1,11 +1,11 @@
-# 第一部分：Deployment - 定義 Redis 要長什麼樣子
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis-db
   namespace: default
 spec:
-  replicas: 1  # 暫時只要一個，以後可以變多
+  replicas: 1  
   selector:
     matchLabels:
       app: audiophile-redis
@@ -21,17 +21,17 @@ spec:
         - containerPort: 6379
 
 ---
-# 第二部分：Service - 定義別人要怎麼找到 Redis
+
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-service # 👈 這就是以後 FastAPI 連線要用的名稱！
+  name: redis-service 
   namespace: default
 spec:
   selector:
-    app: audiophile-redis # 必須對應上面 Deployment 的標籤
+    app: audiophile-redis 
   ports:
     - protocol: TCP
-      port: 6379      # Service 對外的 Port
-      targetPort: 6379 # 容器內部的 Port
-  type: ClusterIP # 僅限 K8s 內部存取，安全性高
+      port: 6379      
+      targetPort: 6379 
+  type: ClusterIP 
