@@ -18,7 +18,7 @@ spec:
         ports:
         - containerPort: 8000
         env:
-        # --- PostgreSQL 翻譯層 ---
+        
         - name: DB_USER
           valueFrom:
             secretKeyRef:
@@ -39,7 +39,7 @@ spec:
         - name: DB_PORT
           value: "5432"
 
-        # --- 👇 這裡就是你漏掉的 MongoDB 翻譯層 ---
+        
         - name: MONGO_USER
           valueFrom:
             secretKeyRef:
@@ -55,7 +55,7 @@ spec:
         - name: MONGO_PORT
           value: "27017"
 
-        # --- 其他 Secrets ---
+        
         - name: SECRET_KEY
           valueFrom:
             secretKeyRef:
