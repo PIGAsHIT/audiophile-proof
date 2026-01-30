@@ -1,32 +1,20 @@
-# 忽略資料庫數據 (解決 Permission denied 的關鍵！)
 docker_data/
 terraform/
 infra/docker_data/
 postgres_data/
 mongo_data/
-
-# 忽略虛擬環境
 venv/
 .venv/
-
-# 忽略 Git 紀錄
 .git/
 .gitignore
-
-# 忽略 Python 快取
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-
-# 忽略環境變數檔 (為了資安，不要打包進 Image，雖然我們在 compose 裡有覆寫)
 .env
-
-# 忽略測試相關
 tests/
 pytest.ini
 .pytest_cache/
-
 kubectl
 minikube-linux-amd64
 minikube
