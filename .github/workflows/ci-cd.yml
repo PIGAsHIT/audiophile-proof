@@ -11,7 +11,7 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: user        # 💡 Docker 容器強迫用的名字
+          POSTGRES_USER: user       
           POSTGRES_PASSWORD: password
           POSTGRES_DB: test_db
         ports: ["5432:5432"]
@@ -41,27 +41,27 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-asyncio pytest-cov httpx ruff
 
-      - name: Lint with Ruff 🧹
-        run: ruff check . --fix # 💡 加上 --fix，能修的自動幫你修
+      - name: Lint with Ruff 
+        run: ruff check . --fix 
 
-      - name: Run Tests with Coverage 🚀
+      - name: Run Tests with Coverage 
         env:
-          # 💡 關鍵轉譯層：把 POSTGRES_USER 對齊到你程式碼用的 DB_USER
+          
           DB_USER: user
           DB_PASSWORD: password
           DB_NAME: test_db
           DB_HOST: localhost
           DB_PORT: 5432
-          # 同時保留 DATABASE_URL 確保萬無一失
+          
           DATABASE_URL: postgresql://user:password@localhost:5432/test_db
           
-          # MongoDB 轉譯
+          
           MONGO_USER: admin
           MONGO_PASSWORD: secret_mongo
           MONGO_HOST: localhost
           MONGO_PORT: 27017
           
-          # 其他環境變數
+          
           REDIS_HOST: localhost
           SECRET_KEY: supersecretkeytesting
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
