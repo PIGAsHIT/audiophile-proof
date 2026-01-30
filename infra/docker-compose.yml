@@ -48,9 +48,7 @@ services:
     volumes:
       - ../src:/app/src  
 
-  # =========================================
-  # Infra (資料庫層)
-  # =========================================
+  
   postgres:
     image: postgres:15-alpine
     container_name: audiophile_postgres
@@ -62,8 +60,8 @@ services:
     
     
     environment:
-      POSTGRES_USER: ${DB_USER:-postgres}         # 如果 .env 沒設，預設 postgres
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-password} # 如果 .env 沒設，預設 password
+      POSTGRES_USER: ${DB_USER:-postgres}         
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password} 
       POSTGRES_DB: ${DB_NAME:-audiophile_db}
     
     volumes:
