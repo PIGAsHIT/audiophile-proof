@@ -4,6 +4,7 @@ kind: Kustomization
 
 resources:
   - infra/k8s/fastapi-k8s.yaml
+  - infra/k8s/fastapi-monitor.yaml
 
 images:
   - name: pigashit/audiophile-backend 
