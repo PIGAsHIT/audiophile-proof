@@ -34,19 +34,19 @@ class TrackRecommendation(BaseModel):
 
 # --- 使用者驗證相關 Schema ---
 
-# 註冊與登入用的 (接收帳密)
+# 註冊與登入用的 
 class UserCreate(BaseModel):
     email: str
     password: str
 
-# 回傳給前端的使用者資訊 (不包含密碼)
+# 回傳給前端的使用者資訊
 class UserResponse(BaseModel):
     id: int
     email: str
     is_active: bool
 
     class Config:
-        from_attributes = True  # 讓 Pydantic 可以讀取 SQLAlchemy 物件
+        from_attributes = True  # Pydantic 讀取 SQLAlchemy 物件
 
 # Token 回傳格式
 class Token(BaseModel):
