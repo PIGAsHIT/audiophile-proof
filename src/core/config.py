@@ -8,7 +8,6 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     # --- 2. 安全性設定 (Security) ---
-    # 這裡沒給預設值，強迫 .env 一定要設定，否則啟動會報錯 (Fail Fast)
     SECRET_KEY: str 
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
@@ -38,20 +37,16 @@ class Settings(BaseSettings):
     SPOTIFY_CLIENT_SECRET: Optional[str] = None
     SPOTIFY_REDIRECT_URI: str = "http://127.0.0.1:8000/callback"
 
-    # --- 5. Pydantic 設定 (V2 新寫法) ---
+    # --- 5. Pydantic 設定 ---
     model_config = SettingsConfigDict(
-        # 指定讀取的檔案名稱
+        
         env_file=".env",
-        # 檔案編碼
         env_file_encoding="utf-8",
-        # 關鍵！設為 'ignore' 可以忽略 .env 裡多餘的變數，解決你的報錯
         extra="ignore",
-        # 讓變數不分大小寫 (db_host 和 DB_HOST 都可以通)
         case_sensitive=False
     )
 
     # --- helper property: 自動組裝連線字串 ---
-    # 這樣你在 db/postgres.py 只要呼叫 settings.SQLALCHEMY_DATABASE_URI 即可
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
         return f"postgresql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
