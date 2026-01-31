@@ -9,4 +9,4 @@ resources:
 images:
   - name: pigashit/audiophile-backend 
     newName: pigashit/audiophile-backend
-    newTag: "2a0ba729317ea22bde4f072625eb0485a09becc0"
+    newTag: "c3320d361d46875229fb70904a3dc9b520bce708"
