@@ -57,6 +57,5 @@ async def test_spotify_search_flow():
         assert "name" in track
         assert track["artists"][0]["name"] is not None
         
-        # 💡 成功輸出：這對你驗證 music_service 是否正常很有幫助
         print(f"\n[Spotify Test Success] Found: {track['name']} by {track['artists'][0]['name']}")
         print(f"URL: {track['external_urls']['spotify']}")
