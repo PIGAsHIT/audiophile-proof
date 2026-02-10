@@ -1,10 +1,10 @@
- # 🎧 Audiophile Proof | 高傳真音訊分析平台後端
+ # Audiophile Proof | HIFI音訊分析平台後端
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green) ![Docker](https://img.shields.io/badge/Docker-Available-blue) ![K8s](https://img.shields.io/badge/Kubernetes-Ready-blue) ![Grafana](https://img.shields.io/badge/Grafana-Monitoring-orange)
 
 **Audiophile Proof** 是一個專為耳機發燒友打造的後端系統，旨在解決音訊設備規格繁雜、數據分散的問題。本專案採用現代化 **Microservices-ready** 架構，結合混合資料庫設計（Hybrid Database Pattern）與完整 DevOps 流水線，實現高併發、低延遲的資料查詢與推薦服務。
 
-## 💡 專案亮點 (Key Highlights)
+## 專案亮點 (Key Highlights)
 
 * **混合資料庫架構 (Polyglot Persistence)**：
     * 針對 **交易一致性 (ACID)** 需求（如使用者帳號、權限），採用 **PostgreSQL**。
@@ -32,7 +32,7 @@
 | **CI/CD** | **GitHub Actions / ArgoCD** | 持續整合與 GitOps 部署流程 |
 | **Monitoring** | **Prometheus & Grafana** | 系統指標收集與視覺化儀表板 |
 
-## 📂 系統架構與目錄結構
+## 系統架構與目錄結構
 
 本專案採用分層式架構 (Layered Architecture)，將路由、商業邏輯與資料存取層分離，並透過依賴注入 (Dependency Injection) 管理資料庫連線。
 
