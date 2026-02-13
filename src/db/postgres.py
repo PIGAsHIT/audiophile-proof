@@ -6,7 +6,7 @@ from src.core.config import settings
 
 
 DB_USER = os.getenv("DB_USER")
-DB_PASS = os.getenv("DB_PASS")
+DB_PASS = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST", "postgres-service")  # 預設連向 K8s Service
 DB_PORT = os.getenv("DB_PORT", "5432")
 DB_NAME = os.getenv("DB_NAME", "audiophile_db")

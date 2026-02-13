@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, Request
+import asyncio  # 🔍 1. 記得引入 asyncio
+from fastapi import APIRouter, Depends, Request, Query # 🔍 2. 記得引入 Query
 from typing import Optional
 from src.schema.schemas import HeadphoneRequest, TrackRecommendation
 from src.services.ai_service import analyze_headphone
@@ -26,7 +27,40 @@ async def get_optional_user(request: Request, db: Session = Depends(get_db)):
         return None
 
 @router.post("", response_model=TrackRecommendation) 
-async def get_recommendation(request: HeadphoneRequest, user: Optional[User] = Depends(get_optional_user)):
+async def get_recommendation(
+    request: HeadphoneRequest, 
+    user: Optional[User] = Depends(get_optional_user),
+    mock: bool = Query(False, description="開啟模擬模式 (不消耗 API 配額)") # 🔍 3. 新增這個參數
+):
+    
+    # ==========================================
+    # 模擬非同步 I/O
+    # ==========================================
+    if mock:
+        # print(f"⚠️ Mock Mode Active: Simulating async delay for {request.model}")
+        await asyncio.sleep(3)  
+        
+        return TrackRecommendation(
+            form_factor="Over-Ear (Mock)",
+            connection="Wired (Mock)",
+            release_year="2024",
+            price_range="High-End",
+            driver_config="Dynamic Driver",
+            sound_features=["Balanced", "Warm", "Detailed"],
+            analysis_bass="Deep and punchy (Simulated)",
+            analysis_mids="Clear and natural (Simulated)",
+            analysis_highs="Smooth extension (Simulated)",
+            listening_guide="This is a mock response for load testing.",
+            title=f"Mock Song for {request.model}",
+            artist="Test Artist",
+            comment="This analysis generated without calling Gemini API.",
+            cover_url="https://via.placeholder.com/300",
+            spotify_url="https://open.spotify.com",
+            track_id="mock_track_id_123",
+            preview_url=None
+        )
+    # ==========================================
+
     # 1. Cache Check
     cached = get_cached_recommendation(request.brand, request.model)
     user_id = str(user.id) if user else None
