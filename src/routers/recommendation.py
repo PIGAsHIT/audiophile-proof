@@ -1,5 +1,5 @@
-import asyncio  # 🔍 1. 記得引入 asyncio
-from fastapi import APIRouter, Depends, Request, Query # 🔍 2. 記得引入 Query
+import asyncio  
+from fastapi import APIRouter, Depends, Request, Query 
 from typing import Optional
 from src.schema.schemas import HeadphoneRequest, TrackRecommendation
 from src.services.ai_service import analyze_headphone
@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 
 router = APIRouter()
 
-# 輔助：嘗試取得使用者但不強制
+
 async def get_optional_user(request: Request, db: Session = Depends(get_db)):
     auth = request.headers.get('Authorization')
     if not auth: 
@@ -37,7 +37,7 @@ async def get_recommendation(
     # 模擬非同步 I/O
     # ==========================================
     if mock:
-        # print(f"⚠️ Mock Mode Active: Simulating async delay for {request.model}")
+        
         await asyncio.sleep(3)  
         
         return TrackRecommendation(
