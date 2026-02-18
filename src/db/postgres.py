@@ -1,19 +1,15 @@
-import os
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-from src.core.config import settings
+from src.core.config import settings  # <--- 1. 引入唯一的真理
 
+DATABASE_URL = settings.SQLALCHEMY_DATABASE_URI
 
-DB_USER = os.getenv("DB_USER")
-DB_PASS = os.getenv("DB_PASSWORD")
-DB_HOST = os.getenv("DB_HOST", "postgres-service")  # 預設連向 K8s Service
-DB_PORT = os.getenv("DB_PORT", "5432")
-DB_NAME = os.getenv("DB_NAME", "audiophile_db")
-
-SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-engine = create_engine(settings.SQLALCHEMY_DATABASE_URI)
+engine = create_engine(
+    DATABASE_URL,
+    pool_pre_ping=True,  
+    pool_size=10,
+    max_overflow=20
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
