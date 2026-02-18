@@ -1,58 +1,66 @@
-import os
+import logging
+from datetime import datetime, timezone
 from motor.motor_asyncio import AsyncIOMotorClient
-from datetime import datetime
-from dotenv import load_dotenv
 from src.core.config import settings
 
-load_dotenv()
+logger = logging.getLogger("uvicorn")
 
-MONGO_USER = os.getenv("MONGO_USER", "admin")
-MONGO_PASSWORD = os.getenv("MONGO_PASSWORD", "secret_mongo")
-MONGO_HOST = os.getenv("MONGO_HOST", "localhost")
-MONGO_PORT = os.getenv("MONGO_PORT", "27017")
-MONGO_URL = f"mongodb://{MONGO_USER}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/?authSource=admin"
+class MongoDBManager:
+    """
+    MongoDB 管理類別 (Singleton 模式)
+    負責連線、關閉以及寫入稽核日誌 (Audit Logs)
+    """
+    def __init__(self):
+        self.client: AsyncIOMotorClient = None
+        self.db = None
 
+    async def connect(self):
+        logger.info(f"🔗 正在連線 MongoDB: {settings.MONGO_HOST}:{settings.MONGO_PORT} ...")
+        try:
+            self.client = AsyncIOMotorClient(settings.MONGO_URI)
+            self.db = self.client.audiophile_db
+           
+            await self.client.admin.command('ping')
+            logger.info("✅ MongoDB 連線成功！")
+        except Exception as e:
+            logger.error(f"❌ MongoDB 連線失敗: {e}")
+            raise e
 
-client: AsyncIOMotorClient = None
-db = None
+    async def close(self):
+        if self.client:
+            self.client.close()
+            logger.info("🔌 MongoDB 連線已關閉")
+
+    async def log_request(self, event_type: str, data: dict, user_id: str = None):
+        """
+        記錄 API 請求或系統事件
+        """
+        if self.db is None:
+            logger.warning("⚠️ MongoDB 尚未連線，無法寫入 Log")
+            return
+
+        try:
+            log_entry = {
+                "event": event_type,
+                "timestamp": datetime.now(timezone.utc),
+                "user_id": user_id,
+                "data": data
+            }
+            await self.db.logs.insert_one(log_entry)
+        except Exception as e:
+            logger.error(f"❌ [MongoDB Log Error] {e}")
+
+mongo_manager = MongoDBManager()
 
 
 async def connect_to_mongo():
-    global client, db
-    print(f"🔗 正在連線 MongoDB: {MONGO_HOST}:{MONGO_PORT} ...")
-    try:
-        client = AsyncIOMotorClient(settings.MONGO_URI)
-        db = client.audiophile_db
-        
-        await client.admin.command('ping')
-        print("✅ MongoDB 連線成功！")
-    except Exception as e:
-        print(f"❌ MongoDB 連線失敗: {e}")
+    await mongo_manager.connect()
 
 async def close_mongo_connection():
-    global client
-    if client:
-        client.close()
-        print("🔌 MongoDB 連線已關閉")
+    await mongo_manager.close()
 
 async def log_request(event_type: str, data: dict, user_id: str = None):
-    
-    if db is None:
-        print("⚠️ Warning: MongoDB 尚未連線，無法寫入 Log")
-        return
-
-    try:
-        log_entry = {
-            "event": event_type,
-            "timestamp": datetime.utcnow(),
-            "user_id": user_id,
-            "data": data
-        }
-       
-        await db.logs.insert_one(log_entry)
-        
-    except Exception as e:
-        print(f"❌ [Log Error] {e}")
+    await mongo_manager.log_request(event_type, data, user_id)
 
 def get_database():
-    return db
+    return mongo_manager.db
