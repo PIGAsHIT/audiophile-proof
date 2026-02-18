@@ -49,13 +49,13 @@ app = FastAPI(
     lifespan=lifespan 
 )
 
-app.add_middleware(
+'''app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-)
+)'''
 
 Instrumentator().instrument(app).expose(app)
 
