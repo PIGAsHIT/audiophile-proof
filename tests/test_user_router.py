@@ -71,3 +71,17 @@ async def test_remove_favorite_not_found(setup_mocks):
 
     assert res.status_code == 404
     assert res.json()["detail"] == "Favorite not found"
+
+async def test_get_history_success(setup_mocks):
+    """Test 4: 測試歷史紀錄"""
+    mock_db = setup_mocks
+    mock_cursor = AsyncMock()
+    
+    mock_cursor.__aiter__.return_value = [
+        {"data": {"brand": "Sony", "model": "XM5", "result": "Song A"}, "timestamp": datetime.utcnow()}
+    ]
+    mock_db["logs"].find.return_value.sort.return_value.limit.return_value = mock_cursor
+
+    res = client.get("/user/history")
+    assert res.status_code == 200
+    assert len(res.json()) > 0
