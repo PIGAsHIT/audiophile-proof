@@ -10,7 +10,6 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 TEST_MODEL = "gemini-2.5-flash" 
 
 @pytest.mark.skipif(not GEMINI_API_KEY, reason="Skipping: GEMINI_API_KEY not found")
-@pytest.mark.asyncio
 @pytest.mark.external
 async def test_gemini_connection(): 
     client = genai.Client(api_key=GEMINI_API_KEY)
