@@ -11,10 +11,10 @@ TEST_MODEL = "gemini-2.5-flash"
 
 @pytest.mark.skipif(not GEMINI_API_KEY, reason="Skipping: GEMINI_API_KEY not found")
 @pytest.mark.asyncio
-async def test_gemini_connection(): # 修正：加上 async
+@pytest.mark.external
+async def test_gemini_connection(): 
     client = genai.Client(api_key=GEMINI_API_KEY)
-    
-    # 使用 Sennheiser HD800S 測試 AI 描述能力
+
     headphone_model = "Sennheiser HD800S"
     test_prompt = f"Explain the soundstage of {headphone_model} in one short sentence."
 
