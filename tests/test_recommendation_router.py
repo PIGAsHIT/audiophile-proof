@@ -28,7 +28,6 @@ def mock_dependencies(mocker):
 
     mocker.patch("src.routers.recommendation.get_cached_recommendation", return_value=None)
     mocker.patch("src.routers.recommendation.set_cached_recommendation")
-
     mocker.patch("src.routers.recommendation.log_request", new_callable=AsyncMock)
     
     yield
@@ -41,7 +40,7 @@ async def test_get_recommendation_full_flow(mock_dependencies, mocker):
     mocker.patch("src.routers.recommendation.search_track", new_callable=AsyncMock, return_value=MOCK_TRACK_DATA)
 
     payload = {"brand": "Sennheiser", "model": "HD800S"}
-    response = client.post("/recommendations", json=payload) # 假設你的 prefix 是 /recommendations
+    response = client.post("/recommend", json=payload) 
 
     assert response.status_code == 200
     data = response.json()
@@ -50,11 +49,10 @@ async def test_get_recommendation_full_flow(mock_dependencies, mocker):
 
 async def test_get_recommendation_cache_hit(mock_dependencies, mocker):
     """Test 2: 快取命中情況"""
-    # 模擬 Redis 有資料
     mocker.patch("src.routers.recommendation.get_cached_recommendation", return_value={"title": "Cached Song", "artist": "Cached Artist"})
     
     payload = {"brand": "Sennheiser", "model": "HD800S"}
-    response = client.post("/recommendations", json=payload)
+    response = client.post("/recommend", json=payload)
 
     assert response.status_code == 200
     assert response.json()["title"] == "Cached Song"
@@ -62,7 +60,7 @@ async def test_get_recommendation_cache_hit(mock_dependencies, mocker):
 async def test_get_recommendation_mock_mode():
     """Test 3: mock=True 模式"""
     payload = {"brand": "Test", "model": "Mock"}
-    response = client.post("/recommendations?mock=true", json=payload)
+    response = client.post("/recommend?mock=true", json=payload)
 
     assert response.status_code == 200
     assert "(Mock)" in response.json()["form_factor"]
@@ -73,7 +71,7 @@ async def test_get_recommendation_ai_fails(mock_dependencies, mocker):
     mocker.patch("src.routers.recommendation.search_track", new_callable=AsyncMock, return_value=MOCK_TRACK_DATA)
 
     payload = {"brand": "Broken", "model": "AI"}
-    response = client.post("/recommendations", json=payload)
+    response = client.post("/recommend", json=payload)
 
     assert response.status_code == 200
-    assert response.json()["comment"] == "AI Busy"
+    assert response.json()["comment"] == "AI not available"
