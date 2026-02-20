@@ -49,7 +49,27 @@ async def test_get_recommendation_full_flow(mock_dependencies, mocker):
 
 async def test_get_recommendation_cache_hit(mock_dependencies, mocker):
     """Test 2: 快取命中情況"""
-    mocker.patch("src.routers.recommendation.get_cached_recommendation", return_value={"title": "Cached Song", "artist": "Cached Artist"})
+    mock_cached_data = {
+        "form_factor": "Over-Ear",
+        "connection": "Wired",
+        "release_year": "2024",
+        "price_range": "High",
+        "driver_config": "Dynamic",
+        "sound_features": ["Clear"],
+        "analysis_bass": "Punchy",
+        "analysis_mids": "Natural",
+        "analysis_highs": "Crisp",
+        "listening_guide": "Use Amp",
+        "title": "Cached Song",
+        "artist": "Cached Artist",
+        "comment": "From Cache",
+        "cover_url": "http://cover.jpg",
+        "spotify_url": "http://spotify.com",
+        "track_id": "123",
+        "preview_url": None
+    }
+    
+    mocker.patch("src.routers.recommendation.get_cached_recommendation", return_value=mock_cached_data)
     
     payload = {"brand": "Sennheiser", "model": "HD800S"}
     response = client.post("/recommend", json=payload)
@@ -74,4 +94,4 @@ async def test_get_recommendation_ai_fails(mock_dependencies, mocker):
     response = client.post("/recommend", json=payload)
 
     assert response.status_code == 200
-    assert response.json()["comment"] == "AI not available"
+    assert response.json()["comment"] == "AI Busy"
