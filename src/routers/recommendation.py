@@ -30,12 +30,10 @@ async def get_optional_user(request: Request, db: Session = Depends(get_db)):
 async def get_recommendation(
     request: HeadphoneRequest, 
     user: Optional[User] = Depends(get_optional_user),
-    mock: bool = Query(False, description="開啟模擬模式 (不消耗 API 配額)") # 🔍 3. 新增這個參數
+    mock: bool = Query(False, description="開啟模擬模式 (不消耗 API 配額)") 
 ):
-    
-    # ==========================================
+
     # 模擬非同步 I/O
-    # ==========================================
     if mock:
         
         await asyncio.sleep(3)  
@@ -59,8 +57,7 @@ async def get_recommendation(
             track_id="mock_track_id_123",
             preview_url=None
         )
-    # ==========================================
-
+        
     # 1. Cache Check
     cached = get_cached_recommendation(request.brand, request.model)
     user_id = str(user.id) if user else None
