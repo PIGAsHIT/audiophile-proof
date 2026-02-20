@@ -15,7 +15,7 @@ CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 @pytest.mark.skipif(not CLIENT_ID or not CLIENT_SECRET, reason="Spotify Credentials missing")
 @pytest.mark.asyncio
 async def test_spotify_search_flow():
-    # 建立 Basic Auth 字串
+
     auth_str = f"{CLIENT_ID}:{CLIENT_SECRET}"
     b64_auth_str = base64.b64encode(auth_str.encode()).decode()
 
@@ -26,7 +26,6 @@ async def test_spotify_search_flow():
     data_auth = {"grant_type": "client_credentials"}
 
     async with httpx.AsyncClient() as client:
-        # 1. 取得 Access Token
         
         token_resp = await client.post(AUTH_URL, headers=headers_auth, data=data_auth, timeout=10.0)
         
@@ -36,13 +35,12 @@ async def test_spotify_search_flow():
         access_token = token_resp.json().get("access_token")
         assert access_token is not None
 
-        # 2. 執行歌曲搜尋 (以 Hotel California 作為經典燒友測試)
         headers_search = {"Authorization": f"Bearer {access_token}"}
         params_search = {
             "q": "Hotel California - Live",
             "type": "track",
             "limit": 1,
-            "market": "TW" # 指定市場確保能拿到正確的 Spotify 連結
+            "market": "TW" 
         }
 
         search_resp = await client.get(SEARCH_URL, headers=headers_search, params=params_search)
