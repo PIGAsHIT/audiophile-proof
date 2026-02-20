@@ -13,7 +13,6 @@ mock_user.email = "test@example.com"
 
 @pytest.fixture(autouse=True)
 def setup_mocks(mocker):
-    # 繞過 JWT 驗證 直接回傳 mock_user
     app.dependency_overrides[get_current_user] = lambda: mock_user
 
     mock_db = MagicMock()
@@ -39,7 +38,7 @@ async def test_add_favorite_success(setup_mocks):
         "spotify_url": "http://spotify.com"
     }
 
-    res = client.post("/auth/favorites", json=fav_data)
+    res = client.post("/user/favorites", json=fav_data)
     
     assert res.status_code == 200
     assert res.json()["status"] == "added"
@@ -53,7 +52,8 @@ async def test_add_favorite_exists(setup_mocks):
     mock_col.find_one = AsyncMock(return_value={"id": "some_id"})
 
     fav_data = {"track_id": "track_123", "title": "...", "artist": "...", "cover_url": "...", "spotify_url": "..."}
-    res = client.post("/auth/favorites", json=fav_data)
+
+    res = client.post("/user/favorites", json=fav_data)
 
     assert res.status_code == 200
     assert res.json()["status"] == "exists"
@@ -67,7 +67,7 @@ async def test_remove_favorite_not_found(setup_mocks):
     mock_res.deleted_count = 0
     mock_col.delete_one = AsyncMock(return_value=mock_res)
 
-    res = client.delete("/auth/favorites/track_123")
+    res = client.delete("/user/favorites/track_123")
 
     assert res.status_code == 404
     assert res.json()["detail"] == "Favorite not found"
