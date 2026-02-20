@@ -13,7 +13,6 @@ CLIENT_ID = os.getenv("SPOTIFY_CLIENT_ID")
 CLIENT_SECRET = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 @pytest.mark.skipif(not CLIENT_ID or not CLIENT_SECRET, reason="Spotify Credentials missing")
-@pytest.mark.asyncio
 @pytest.mark.external
 async def test_spotify_search_flow():
 
