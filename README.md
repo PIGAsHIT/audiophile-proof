@@ -14,7 +14,7 @@
 * **MongoDB (Async)**: 使用 **Motor** 驅動實現非同步讀寫，處理 Schema-less 的耳機規格參數與使用者行為日誌 (Logs)。
 * **Redis**: 實作熱門推薦資料快取。針對 Gemini AI 與 Spotify API 的呼叫結果進行緩存，大幅**降低 70% 以上的重複請求延遲**並節省 API 配額。
 
-### 2. 專業級測試架構 (SDET Practice)
+### 2. 測試架構 (SDET Practice)
 專案總覆蓋率達 **76%**，實踐測試隔離策略：
 * **Mocking 隔離技術**: 使用 `unittest.mock` 徹底隔離 AI 與 Spotify API。透過模擬 **Pydantic 驗證失敗**、**401 權限異常**、**Cache Miss** 等邊界條件，確保系統具備極強的容錯能力。
 * **Async 測試優化**: 全面啟用 `asyncio_mode = auto`，並手動處理 **MongoDB 非同步迭代器 (Async Cursor)** 的模擬測試。
@@ -24,29 +24,5 @@
 * **GitHub Actions CI/CD**: 整合真實的 **Postgres, Redis, Mongo Service** 容器進行整合測試，並加入 **Ruff** 進行代碼質量靜態檢查 (Linting)。
 * **GitOps 部署**: 透過 Docker 與 Kustomize 準備好部署清單，支援自動化更新映像檔標籤。
 * **指標監控**: 整合 Prometheus 收集系統指標 (Request Latency, Throughput)，並透過 Grafana 實現可視化監控。
-
----
-
-## Tech Stack
-
-| 類別 | 技術工具 | 解決的問題 |
-| :--- | :--- | :--- |
-| **框架** | **FastAPI** | 高效能非同步處理，利用 Pydantic 實現強型別資料驗證。 |
-| **AI 整合** | **Google Gemini** | 負責將生硬參數轉化為專業的聽感描述與試聽指南。 |
-| **音訊整合** | **Spotify API** | 根據 AI 分析結果，自動匹配適合該設備測試的曲目。 |
-| **測試** | **Pytest-Cov** | 定位代碼死角，確保關鍵路徑（如加最愛、推薦邏輯）100% 執行。 |
-| **基礎設施** | **Docker / K8s** | 解決環境一致性問題，支援 Kubernetes 水平擴展。 |
-
----
-
-## 📊 測試報告摘要 (Latest Coverage)
-
-目前專案測試重點在於確保**業務轉運站 (Routers)** 與 **外部服務 (Services)** 的穩定性：
-
-* **Music / Auth Service**: `100%` (核心安全與基礎功能)
-* **Recommendation Router**: `84%` (包含快取命中、AI 降級處理邏輯)
-* **User Router**: `78%` (包含收藏清單操作、歷史紀錄讀取)
-
-
 
 ---
