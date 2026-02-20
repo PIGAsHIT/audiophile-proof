@@ -1,6 +1,6 @@
 # 🎧 Audiophile Proof | 全方位音訊分析平台後端
 
-![Python](https://img.shields.io/badge/Python-3.10%2B-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green) ![Coverage](https://img.shields.io/badge/Coverage-76%25-brightgreen) ![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-blueviolet)
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue) ![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green) ![Docker](https://img.shields.io/badge/Docker-Available-blue) ![K8s](https://img.shields.io/badge/Kubernetes-Ready-blue) ![Grafana](https://img.shields.io/badge/Grafana-Monitoring-orange) ![Coverage](https://img.shields.io/badge/Coverage-76%25-brightgreen) ![CI/CD](https://img.shields.io/badge/CI/CD-GitHub%20Actions-blueviolet)
 
 **Audiophile Proof** 是一個專為耳機發燒友設計的深度分析平台。不同於單純的資料查詢，本專案整合了 **Gemini AI 聽感分析**與 **Spotify 串流自動配對**。開發核心在於實現「混合資料庫架構 (Polyglot Persistence)」與「專業級自動化測試流水線」，確保系統在處理複雜異構資料時的穩定性與擴展性。
 
