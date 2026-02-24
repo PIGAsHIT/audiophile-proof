@@ -89,11 +89,15 @@ async def get_recommendation(
     if cached:
         await log_request("search_cache_hit", {"brand": request.brand, "model": request.model}, user_id)
         
-        # 🌟 新增：即使是快取中獎，只要使用者有登入，一樣觸發寄信任務
+        
         if user_email:
             background_tasks.add_task(
                 notify_n8n_report, 
-                user_email, request.model, cached.get("comment", ""), cached.get("spotify_url", "")
+                email=user_email, 
+                brand=request.brand,
+                model=request.model, 
+                result_summary=result["comment"], 
+                spotify_url=result["spotify_url"]
             )
         return TrackRecommendation(**cached)
 
@@ -148,7 +152,11 @@ async def get_recommendation(
     if user_email:
         background_tasks.add_task(
             notify_n8n_report, 
-            user_email, request.model, result["comment"], result["spotify_url"]
+            user_email, 
+            request.brand,  # 補上 brand 參數
+            request.model, 
+            result["comment"], 
+            result["spotify_url"]
         )
         
     return TrackRecommendation(**result)
