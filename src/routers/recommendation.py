@@ -19,7 +19,7 @@ router = APIRouter()
 # ==========================================
 # 🚀 新增：非同步背景任務 (通知 n8n)
 # ==========================================
-async def notify_n8n_report(email: str, model: str, result_summary: str, spotify_url: str):
+async def notify_n8n_report(email: str, brand: str, model: str, result_summary: str, spotify_url: str):
     """
     透過 K8s 內部網路呼叫 n8n 的 Webhook，由 n8n 處理後續的 Email 寄發。
     """
@@ -28,6 +28,7 @@ async def notify_n8n_report(email: str, model: str, result_summary: str, spotify
         try:
             await client.post(N8N_WEBHOOK_URL, json={
                 "email": email,
+                "brand": brand,
                 "model": model,
                 "summary": result_summary,
                 "spotify_url": spotify_url,
