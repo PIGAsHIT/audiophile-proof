@@ -96,8 +96,8 @@ async def get_recommendation(
                 email=user_email, 
                 brand=request.brand,
                 model=request.model, 
-                result_summary=result["comment"], 
-                spotify_url=result["spotify_url"]
+                result_summary=cached.get("comment", ""), 
+                spotify_url=cached.get("spotify_url", "")
             )
         return TrackRecommendation(**cached)
 
